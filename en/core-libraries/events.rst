@@ -458,6 +458,24 @@ reality, it cannot do its logic if the model is the Cart::
         return array('conditions' => ...);
     }
 
+Let's take another example where you are using a 3rd party plugin, ie. `ThirdPartyPlugin` which handles Feedbacks. The developer of this plugin has not implemented any events, but you would like to know when a Feedback has been saved and ultimately act on it. You can always listen to all `Model.afterSave` events fired by the model, as explained above. However, you can take a more direct approach and only listen to the event you really need::
+
+    // You can create the following before the save operation, ie. config/bootstrap.php
+    use Cake\ORM\TableRegistry;
+    use Cake\Mailer\Email; // If sending emails
+
+    TableRegistry::get('ThirdPartyPlugin.Feedbacks')->eventManager()->on('Model.afterSave', function($event, $entity)
+    {
+        // For example we can send an email to the admin
+        $email = new Email('default');
+        $email->from('info@yoursite.com' => 'Your Site')
+            ->to('admin@yoursite.com')
+            ->subject('New Feedback - Your Site')
+            ->send('Body of message');
+    }
+
+You can take a similiar approach to specifically listen to any events that are fired by the Model, Controller or View.
+
 Conclusion
 ==========
 
